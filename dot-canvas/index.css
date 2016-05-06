@@ -1,0 +1,21 @@
+
+@import url(https://fonts.googleapis.com/css?family=Montserrat:700);
+
+html, body {
+	font-size: 10px;
+  overflow: hidden;
+}
+
+canvas { 
+  width: 100%;
+  background: #000; 
+}
+
+
+
+
+
+
+
+
+
