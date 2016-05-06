@@ -12,26 +12,24 @@
 var container = document.getElementById('container'),
     canvas = container.getBoundingClientRect(),
     ctx = container.getContext('2d'),
+    dots = [],
+    columns = 30,
+    hieght = columns / 2.2,
+    padding = 50,
     mouse = {
       x: 0, 
       y: 0
-    },
-    dots = [],
-    width = 36,
-    hieght = width / 2.2,
-    size = 30,
-    padding = 100;
-
+    };
 
 // create our grid of dots
 // make coordinates
 function create() {
 
-  for (var i = 1; i < width-1; i++) {
-    var x = Math.floor((((canvas.width) / (width - 1)) * i));
+  for (var i = 1; i < columns; i++) {
+    var x = Math.floor((((canvas.width - padding * 2) / (columns - 1)) * i) + padding);
 
-    for (var j = 1; j < hieght-1; j++) {
-      var y = Math.floor((((canvas.height) / (hieght - 1)) * j));
+    for (var j = 1; j < hieght; j++) {
+      var y = Math.floor((((canvas.height - padding * 2) / (hieght - 1)) * j) + padding);
 
       dots.push({
         x: x,
@@ -51,7 +49,6 @@ function init() {
 init();
 create();
 
-
 // drawing and rendering of the dots
 function render() {
 
@@ -62,21 +59,24 @@ function render() {
   ctx.fillStyle = '#47A84D';
 
   // for each dot
+  // draw our circle
   for(var i = 0; i < dots.length; i++){
     var currentDotPos = dots[i];
     var newDotPos = moveDot(currentDotPos);
-    var x = currentDotPos.x;
-    var y = currentDotPos.y;
+    var x = currentDotPos.x + newDotPos.x;
+    var y = currentDotPos.y + newDotPos.y;
     var radius = currentDotPos.size;
     ctx.beginPath();
-    ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+
+    ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
     ctx.closePath();
     ctx.fill();
   }
 }
 
 function moveDot(dot) {
-  var dotScale;
+  var newPosX,
+      newPosY;
 
   // find the distance from the line to the mouse
   var currentDot = getDistance(dot, mouse);
@@ -84,20 +84,29 @@ function moveDot(dot) {
   // flip the number. 
   // so that the dot is bigger if the mouse is near it.
   // if we dont do this all the dots are big and are smaller when you are near them
-  dot.size = (200 - currentDot) / 20;
+  dot.size = (200-currentDot) / 20;
   dot.size = dot.size < 1 ? 1 : dot.size;
+  dot.angle = getAngle(dot, mouse);
 
   if (currentDot > 20) {
-    dotScale = 20 * Math.cos(dot.angle * Math.PI / 180);
+    newPosX = 20 * Math.cos(dot.angle * Math.PI / 180);
+    newPosY = 20 * Math.sin(dot.angle * Math.PI / 180);
   } else {
-    dotScale = currentDot * Math.cos(dot.angle * Math.PI / 180);
+    newPosX = currentDot * Math.cos(dot.angle * Math.PI / 180);
+    newPosY = currentDot * Math.sin(dot.angle * Math.PI / 180);
   }
   return {
-    x: dotScale,
-    y: dotScale
+    x: newPosX,
+    y: newPosY
   }
 }
 
+function getAngle(dot, mouse) {
+  var x = mouse.x - dot.x;
+  var y = mouse.y - dot.y;
+  var angle = Math.atan2(y,x)/Math.PI*180;
+  return angle;
+}
 
 // need to find out what size the dot should be
 function getDistance(dot, mouse) {
